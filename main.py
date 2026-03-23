@@ -1,5 +1,5 @@
 import os
-import pygame  # Import pygame to create the game
+import pygame # Import pygame to create the game
 
 # -------------------------
 # Base class for all sprites
@@ -67,7 +67,7 @@ class Player(GameSprite):
         self.move_horizontal()
         self.move_vertical()
 
-pygame.init()  # Initialize pygame
+pygame.init() # Initialize pygame
 
 # -------------------------
 # Window configuration
@@ -102,11 +102,10 @@ w2 = GameSprite(
     50, 400
 )
 
-#creando un grupo de paredes
-barriers = pygame.sprite.Group()                # NEW
-# añadiendo paredes al grupo
-barriers.add(w1)                                # NEW
-barriers.add(w2)                                # NEW
+# Creating a group of walls and adding them to the group
+barriers = pygame.sprite.Group()
+barriers.add(w1)
+barriers.add(w2)
 
 # Create Pac-Man player
 pacman = Player(
@@ -121,7 +120,7 @@ final_sprite = GameSprite('pac-1.png', WIN_WIDTH - 85, WIN_HEIGHT - 100, 80, 80)
 # Win and lose images
 # -------------------------
 
-# --- Load end-game images once ---
+# Load end-game images once
 game_over_img = pygame.image.load(os.path.join(IMAGES_PATH, "game-over-3.jpg"))
 thumb_img = pygame.image.load(os.path.join(IMAGES_PATH, "thumb_1.jpg"))
 
@@ -136,14 +135,14 @@ def show_end_screen(image, position=(0, 0)):
     window.fill((255, 255, 255))
     window.blit(image, position)
 
-
 # -------------------------
 # Main game loop
 # -------------------------
-finish = False # End the game        NEW
+
+finish = False # End the game
 run = True
 while run:
-    pygame.time.delay(50)          # Small delay to control game speed
+    pygame.time.delay(50) # Small delay to control game speed
 
     # Check events (keyboard, closing window, etc.)
     for event in pygame.event.get():
@@ -193,4 +192,4 @@ while run:
             finish = True
             show_end_screen(thumb_scaled)
 
-    pygame.display.update()  # Refresh the screen
+    pygame.display.update() # Refresh the screen
