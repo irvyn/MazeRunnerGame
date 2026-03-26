@@ -68,7 +68,7 @@ class Player(GameSprite):
         self.move_vertical()
 
     def fire(self):
-        # el método "fire" (usamos la ubicación del jugador para crear una bala allí)
+        # We use the location of the player to create a bullet there
         bullet = Bullet('bullet.png', self.rect.right, self.rect.centery, 15, 20, 15)
         bullets.add(bullet)
 
@@ -76,40 +76,46 @@ class Player(GameSprite):
 # Enemy class (create the enemy sprite)
 # -------------------------
 class Enemy(GameSprite):
-    side = "left"
+    def __init__(self, image, x, y, width, height, speed, left_limit, right_limit):
+        # Call parent constructor
+        super().__init__(image, x, y, width, height)
 
-    def __init__(self, player_image, player_x, player_y, size_x, size_y, player_speed):
-        # Llamada al constructor de la clase (Sprite):
-        GameSprite.__init__(self, player_image, player_x, player_y, size_x, size_y)
-        self.speed = player_speed
+        # Horizontal movement speed
+        self.speed = speed
 
-    #movimiento de un enemigo
+        # Movement direction: 
+        # 1 = moving right, -1 = moving left
+        self.direction = 1
+
+        # Patrol boundaries
+        self.left_limit = left_limit
+        self.right_limit = right_limit
+
     def update(self):
-        if self.rect.x <= 420: #w1.wall_x + w1.wall_width
-            self.side = "right"
-        if self.rect.x >= 615:
-            self.side = "left"
-        if self.side == "left":
-            self.rect.x -= self.speed
-        else:
-            self.rect.x += self.speed
+        # Move enemy horizontally
+        self.rect.x += self.speed * self.direction
+
+        # Reverse direction when reaching the patrol limits
+        if self.rect.x <= self.left_limit:
+            self.rect.x = self.left_limit
+            self.direction = 1  # move right
+        
+        elif self.rect.x >= self.right_limit:
+            self.rect.x = self.right_limit
+            self.direction = -1 # move left
 
 # -------------------------
 # Bullet class (create the bullet)
 # -------------------------
 class Bullet(GameSprite):
     def __init__(self, player_image, player_x, player_y, size_x, size_y, player_speed):
-        # Llamada al constructor de la clase (Sprite):
-
-        print("Creating a bullet at position:", os.path.join(IMAGES_PATH, player_image))
- 
-        super().__init__(self, os.path.join(IMAGES_PATH, player_image), player_x, player_y, size_x, size_y)
+        GameSprite.__init__(self, os.path.join(IMAGES_PATH, player_image), player_x, player_y, size_x, size_y)
         self.speed = player_speed
 
     def update(self):
-        #movimiento de un enemigo
+        # enemy movement
         self.rect.x += self.speed
-        # desaparece después de alcanzar el borde de la pantalla
+        # disappears after reaching the edge of the screen
         if self.rect.x > 710:
             self.kill()
 
@@ -162,7 +168,16 @@ monsters = pygame.sprite.Group()
 # Create Pac-Man player
 pacman = Player("1-2.png", 5, WIN_HEIGHT - 80,80, 80)
 final_sprite = GameSprite('pac-1.png', WIN_WIDTH - 85, WIN_HEIGHT - 100, 80, 80)
-monster = Enemy('cyborg.png', WIN_WIDTH - 80, 180, 80, 80, 5)
+monster = Enemy(
+    'cyborg.png',
+    WIN_WIDTH - 80,
+    180,
+    80,
+    80,
+    5,
+    420,
+    620
+)
 monsters.add(monster)
 
 # -------------------------
@@ -180,7 +195,7 @@ game_over_scaled = pygame.transform.scale(game_over_img, (WIN_HEIGHT * game_over
 thumb_scaled = pygame.transform.scale(thumb_img, (WIN_WIDTH, WIN_HEIGHT))
 
 def show_end_screen(image, position=(0, 0)):
-    """Draws an end screen image."""
+    """Draws an end screen image"""
     window.fill((255, 255, 255))
     window.blit(image, position)
 
@@ -224,10 +239,9 @@ while run:
         window.fill(BACKGROUND_COLOR)
 
         # Draw game objects
-        w1.draw()
-        w2.draw()
         barriers.draw(window)
-
+        bullets.update()
+        bullets.draw(window)
         final_sprite.draw()
         pacman.draw()
 
@@ -238,7 +252,6 @@ while run:
         monsters.update()
         monsters.draw(window)
         pygame.sprite.groupcollide(bullets, barriers, True, False)
-
 
         # Collision with monster → Game Over
         if pygame.sprite.collide_rect(pacman, monster):
